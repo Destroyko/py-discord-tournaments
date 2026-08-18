@@ -1,0 +1,17 @@
+[Unit]
+Description=py-discord-tournaments Discord bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=discordbot
+WorkingDirectory=/var/www/py-discord-tournaments
+EnvironmentFile=/var/www/py-discord-tournaments/.env
+ExecStart=/var/www/py-discord-tournaments/.venv/bin/python -m bot.main
+Restart=always
+RestartSec=10
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

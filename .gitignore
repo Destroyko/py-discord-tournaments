@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# SQLite (bot state/applications DB)
+*.db
+*.db-journal
+
