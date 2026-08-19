@@ -13,6 +13,8 @@ from bot.rules import TOURNAMENT_RULES_TEXT
 log = logging.getLogger("bot.tournament")
 
 MODAL_TITLE_MAX_LENGTH = 45
+FACEIT_URL_PREFIXES = ("https://www.faceit.com/", "https://faceit.com/")
+STEAM_URL_PREFIX = "https://steamcommunity.com/"
 
 
 class TournamentJoinModal(discord.ui.Modal):
@@ -55,16 +57,16 @@ class TournamentJoinModal(discord.ui.Modal):
         steam_link = self.steam_link.value.strip()
         comment = self.comment.value.strip() or None
 
-        if not faceit_link.startswith("https://"):
+        if not faceit_link.startswith(FACEIT_URL_PREFIXES):
             await interaction.response.send_message(
-                "Ссылка на faceit-аккаунт должна начинаться с `https://`. Повторите /tournament_join.",
+                "Ссылка на faceit-аккаунт должна начинаться с `https://www.faceit.com/`. Повторите /tournament_join.",
                 ephemeral=True,
             )
             return
 
-        if not steam_link.startswith("https://"):
+        if not steam_link.startswith(STEAM_URL_PREFIX):
             await interaction.response.send_message(
-                "Ссылка на Steam-аккаунт должна начинаться с `https://`. Повторите /tournament_join.",
+                f"Ссылка на Steam-аккаунт должна начинаться с `{STEAM_URL_PREFIX}`. Повторите /tournament_join.",
                 ephemeral=True,
             )
             return
@@ -186,11 +188,11 @@ class TournamentCog(commands.Cog):
         if channel is None:
             log.warning("Канал уведомлений %s не найден, embed не отправлен.", self.config.notification_channel_id)
             return
-        embed = discord.Embed(title=f"Новая заявка — {tournament_name}", color=discord.Color.blurple())
+        embed = discord.Embed(title=f"{tournament_name}", color=discord.Color.blurple())
         embed.add_field(name="Участник", value=f"{member.mention} (`{member.id}`)", inline=False)
         embed.add_field(name="Faceit", value=faceit_link, inline=False)
         embed.add_field(name="Steam", value=steam_link, inline=False)
-        embed.add_field(name="Комментарий", value=comment or "—", inline=False)
+        embed.add_field(name="Комментарий", value=comment or "-", inline=False)
         try:
             await channel.send(embed=embed)
         except discord.HTTPException as exc:
@@ -198,7 +200,7 @@ class TournamentCog(commands.Cog):
 
     @app_commands.command(name="tournament_active", description="Включить или выключить регистрацию на турнир")
     @app_commands.describe(
-        registration="true — включить регистрацию, false — выключить",
+        registration="true - включить регистрацию, false - выключить",
         name="Название турнира (обязательно при первом включении, иначе используется предыдущее)",
     )
     @app_commands.guild_only()
