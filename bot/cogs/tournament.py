@@ -240,7 +240,7 @@ class TournamentCog(commands.Cog):
             if not state.is_active:
                 await interaction.response.send_message("Регистрация и так уже выключена.", ephemeral=True)
                 return
-            await self.db.close_cycle()
+            await self.db.close_cycle(closed_by=str(member.id))
             log.info(
                 "Registration closed: tournament=%r cycle=%s by=%s",
                 state.tournament_name, state.current_cycle_id, member.id,

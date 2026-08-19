@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS registration_cycles (
     tournament_name TEXT NOT NULL,
     opened_at TEXT NOT NULL,
     closed_at TEXT,
-    opened_by TEXT NOT NULL
+    opened_by TEXT NOT NULL,
+    closed_by TEXT
 );
 
 CREATE TABLE IF NOT EXISTS applications (
@@ -73,6 +74,13 @@ class Database:
                 "ALTER TABLE applications ADD COLUMN steam_link TEXT NOT NULL DEFAULT ''"
             )
 
+        async with self._conn.execute("PRAGMA table_info(registration_cycles)") as cursor:
+            cycle_columns = {row[1] async for row in cursor}
+        if "closed_by" not in cycle_columns:
+            await self._conn.execute(
+                "ALTER TABLE registration_cycles ADD COLUMN closed_by TEXT"
+            )
+
     async def close(self) -> None:
         if self._conn is not None:
             await self._conn.close()
@@ -100,13 +108,13 @@ class Database:
         await self._conn.commit()
         return cycle_id
 
-    async def close_cycle(self) -> None:
+    async def close_cycle(self, closed_by: str) -> None:
         assert self._conn is not None
         state = await self.get_state()
         if state.current_cycle_id is not None:
             await self._conn.execute(
-                "UPDATE registration_cycles SET closed_at = ? WHERE id = ? AND closed_at IS NULL",
-                (_now(), state.current_cycle_id),
+                "UPDATE registration_cycles SET closed_at = ?, closed_by = ? WHERE id = ? AND closed_at IS NULL",
+                (_now(), closed_by, state.current_cycle_id),
             )
         await self._conn.execute("UPDATE state SET is_active = 0 WHERE id = 1")
         await self._conn.commit()
