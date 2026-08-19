@@ -27,14 +27,14 @@ class TournamentJoinModal(discord.ui.Modal):
         self.tournament_name = tournament_name
 
         self.faceit_link = discord.ui.TextInput(
-            label="Ссылка на аккаунт faceit",
+            label="Ссылка на основной аккаунт faceit",
             style=discord.TextStyle.short,
             placeholder="https://www.faceit.com/ru/players/...",
             required=True,
             max_length=200,
         )
         self.steam_link = discord.ui.TextInput(
-            label="Ссылка на аккаунт Steam",
+            label="Ссылка на основной аккаунт Steam",
             style=discord.TextStyle.short,
             placeholder="https://steamcommunity.com/id/...",
             required=True,
