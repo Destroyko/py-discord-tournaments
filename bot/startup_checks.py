@@ -30,7 +30,7 @@ async def run_startup_checks(bot: commands.Bot, config: Config) -> bool:
         "NOTIFICATION_CHANNEL_ID": config.notification_channel_id,
     }
     for var_name, channel_id in channel_checks.items():
-        channel = guild.get_channel(channel_id)
+        channel = guild.get_channel_or_thread(channel_id)
         if channel is None:
             log.critical("Канал %s=%s не найден в гильдии %s.", var_name, channel_id, guild.id)
             ok = False
