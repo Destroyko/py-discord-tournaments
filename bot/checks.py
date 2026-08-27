@@ -14,3 +14,11 @@ def is_manager(member: discord.Member, manager_role_ids: Iterable[int]) -> bool:
 
 def is_participant(member: discord.Member, participant_role_id: int) -> bool:
     return has_any_role(member, [participant_role_id])
+
+
+def in_channel_or_thread(interaction: discord.Interaction, channel_id: int) -> bool:
+    """True, если команда вызвана в самом канале channel_id или в одной из его веток."""
+    if interaction.channel_id == channel_id:
+        return True
+    # discord.Thread имеет parent_id; у обычных каналов атрибута нет.
+    return getattr(interaction.channel, "parent_id", None) == channel_id

@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot.checks import is_manager, is_participant
+from bot.checks import in_channel_or_thread, is_manager, is_participant
 from bot.config import Config
 from bot.db import Database
 from bot.rules import TOURNAMENT_RULES_TEXT
@@ -254,9 +254,10 @@ class TournamentCog(commands.Cog):
     @app_commands.command(name="tournament_join", description="Подать заявку на участие в турнире")
     @app_commands.guild_only()
     async def tournament_join(self, interaction: discord.Interaction) -> None:
-        if interaction.channel_id != self.config.registration_channel_id:
+        if not in_channel_or_thread(interaction, self.config.registration_channel_id):
             await interaction.response.send_message(
-                f"Эта команда доступна только в <#{self.config.registration_channel_id}>.", ephemeral=True
+                f"Эта команда доступна только в <#{self.config.registration_channel_id}> и его ветках.",
+                ephemeral=True,
             )
             return
 
