@@ -9,8 +9,13 @@ User=discordbot
 WorkingDirectory=/var/www/py-discord-tournaments
 EnvironmentFile=/var/www/py-discord-tournaments/.env
 ExecStart=/var/www/py-discord-tournaments/.venv/bin/python -m bot.main
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=60
+# Провал стартовых проверок (код 3) — не перезапускать: нужна правка конфигурации на сервере.
+RestartPreventExitStatus=3
+# Не более 5 перезапусков за 10 минут, затем systemd прекращает попытки.
+StartLimitIntervalSec=600
+StartLimitBurst=5
 TimeoutStopSec=30
 
 [Install]

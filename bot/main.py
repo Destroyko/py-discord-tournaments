@@ -14,6 +14,10 @@ logging.basicConfig(
 )
 log = logging.getLogger("bot.main")
 
+# Код выхода при провале стартовых проверок. systemd не перезапускает процесс с этим кодом
+# (см. RestartPreventExitStatus в deploy/discord-bot.service), иначе будет цикл переподключений.
+EXIT_STARTUP_CHECKS_FAILED = 3
+
 
 class TournamentBot(commands.Bot):
     def __init__(self, config):
@@ -21,6 +25,7 @@ class TournamentBot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents)
         self.config = config
         self.db = Database(config.db_path)
+        self.exit_code = 0
 
     async def setup_hook(self) -> None:
         await self.db.connect()
@@ -36,6 +41,7 @@ class TournamentBot(commands.Bot):
         ok = await run_startup_checks(self, self.config)
         if not ok:
             log.critical("Проверки при запуске не пройдены — бот останавливается.")
+            self.exit_code = EXIT_STARTUP_CHECKS_FAILED
             await self.close()
             return
         log.info("Все проверки пройдены. Бот готов к работе.")
@@ -66,6 +72,8 @@ def main() -> None:
     bot = TournamentBot(config)
     bot.tree.on_error = _on_app_command_error
     bot.run(config.discord_token, log_handler=None)
+    if bot.exit_code:
+        raise SystemExit(bot.exit_code)
 
 
 if __name__ == "__main__":
